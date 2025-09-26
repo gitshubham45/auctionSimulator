@@ -6,16 +6,15 @@ import (
 	"time"
 
 	"github.com/gitshubham45/auctionSimulator/internal/auction"
-	"github.com/gitshubham45/auctionSimulator/internal/bidder"
 )
 
 func main() {
 	fmt.Println("Welcome to Auction Simulator")
 
-	bidders := make([]*bidder.Bidder, 100)
+	bidders := make([]*auction.Bidder, 100)
 
 	for i := 0; i < 100; i++ {
-		bidders[i] = &bidder.Bidder{
+		bidders[i] = &auction.Bidder{
 			ID: i + 1,
 		}
 	}
