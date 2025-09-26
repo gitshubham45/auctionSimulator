@@ -13,10 +13,10 @@ type Bid struct {
 type Auction struct {
 	ID         int       `json:"id"`
 	Attributes Attribute `json:"attributes"`
-	TimeoutSec int       `json:"timeout_sec"`
+	TimeoutSec int       `json:"timeout_sec"` // limit time for auction
 	StartTs    time.Time `json:"start_ts"`
 	EndTs      time.Time `json:"end_ts"`
 	Bids       []Bid     `json:"bids"`
 	Winner     *Bid      `josn:"winner"`
-	DurationMs int64     `json:"duration_ms"`
+	DurationMs int64     `json:"duration_ms"` // duration of auction
 }
