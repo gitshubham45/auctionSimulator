@@ -1,4 +1,4 @@
-package auction
+package auctionPkg
 
 import (
 	"math/rand/v2"
