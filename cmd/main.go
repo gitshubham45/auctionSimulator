@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -24,13 +25,19 @@ func main() {
 
 	for i := 0; i < 40; i++ {
 		attr := make(auctionPkg.Attribute)
+		var sum float64
 		for j := 0; j < 20; j++ {
-			attr[fmt.Sprintf("attr_%d", j+1)] = fmt.Sprintf("value_%d", j+1)
+			val := rand.Float64() * 100
+			attr[fmt.Sprintf("attr_%d", j+1)] = val 
+			sum += val
 		}
+		avg := sum / 20
+
 		auctions[i] = &auctionPkg.Auction{
 			ID:         i + 1,
 			Attributes: attr,
-			TimeoutSec: 5,
+			TimeoutSec: int(5 + avg/20), //  base timeout 5 + scaled by avg attribute
+			BaseValue:  avg,             // base value is average attribute
 		}
 	}
 

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Attribute map[string]string
+type Attribute map[string]float64
 
 type Bid struct {
 	BidderId int       `json:"bidder_id"`
