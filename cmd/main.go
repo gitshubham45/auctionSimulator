@@ -25,6 +25,8 @@ const (
 )
 
 func main() {
+
+	fmt.Println("-------Welcome to Auction Simulator-------")
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	mem := humanizeBytes(m.Sys)
@@ -98,8 +100,9 @@ func main() {
 			// Run Auctions
 			auctionPkg.RunAuction(context.Background(), auc, bidders)
 			winnerJSON, _ := json.Marshal(auc.Winner)
-			fmt.Printf("Auction %d Completed: Winner %s, Duration %d md \n", auc.ID, winnerJSON, auc.DurationMs)
+			fmt.Printf("Auction %d Completed: Winner %s\n", auc.ID, winnerJSON)
 			fmt.Println("Total Bids", len(auc.Bids))
+			fmt.Println("-----------------------------------------------------------------")
 		}(auction)
 	}
 
@@ -119,7 +122,7 @@ func main() {
 
 	runtime.ReadMemStats(&m)
 	mem = humanizeBytes(m.Sys)
-	fmt.Printf("Initial memory usage: %v bytes\n", mem)
+	fmt.Printf("Final memory usage: %v bytes\n", mem)
 }
 
 func humanizeBytes(s uint64) string {

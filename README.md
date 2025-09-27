@@ -71,6 +71,11 @@ cd auctionSimulator
 cp .env.example .env
 ```
 
+- `SIM_VCPU`: Controls the number of virtual CPU cores used for parallel execution.
+- `DELAY_FACTOR`: Adding it to the random generated delay will decide if bidder's bid will be accepted or rejected.
+
+- `SEMAPHORE_LIMIT_FACTOR`: Multiplier that sets the concurrency limit for active goroutines.
+
 You can edit .env to customize settings:
 ```bash
 SIM_VCPU=5
