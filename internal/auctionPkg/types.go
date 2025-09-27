@@ -29,17 +29,18 @@ type Bidder struct {
 	ID int
 }
 
-func (b *Bidder) PlaceBid(attributes Attribute) (Bid, bool) {
-	// decide if want to bid or not
-	// for now passinf 70% of bids
-	if rand.Float64() < 0.7 {
-		// decide based on baseValue a
-		bidAmount := rand.Float64() * 100 // random bid amount
-		return Bid{
-			BidderId: b.ID,
-			Amount:   bidAmount,
-			PlacedAt: time.Now(),
-		}, true
-	}
-	return Bid{}, false
+func (b *Bidder) PlaceBid(attributes Attribute, baseValue float64, timeoutSec, delayFactor int) (Bid, bool) {
+	min := 10 * time.Millisecond
+	max := time.Duration(timeoutSec) * time.Second
+	delay := min + time.Duration(rand.Float64()*float64(max-min)) + time.Duration(delayFactor)*time.Millisecond
+
+	// Actually wait (simulate network + reaction time)
+	time.Sleep(delay)
+	// decide based on baseValue of auction
+	bidAmount := baseValue + rand.Float64()*100 // random bid amount
+	return Bid{
+		BidderId: b.ID,
+		Amount:   bidAmount,
+		PlacedAt: time.Now(),
+	}, true
 }

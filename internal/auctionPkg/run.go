@@ -2,7 +2,9 @@ package auctionPkg
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -10,9 +12,19 @@ import (
 func RunAuction(ctx context.Context, auction *Auction, bidders []Bidder) {
 	auction.StartTs = time.Now()
 
+	delayFactorStr := os.Getenv("DELAY_FACTOR")
+	delayFactorValue := 100
+
+	if delayFactorStr != "" {
+		if val, err := strconv.Atoi(delayFactorStr); err == nil && val > 0 {
+			delayFactorValue = val
+		} else {
+			log.Printf("Invalid or negative DELAY_FACTOR '%s', using default %d", delayFactorStr, delayFactorValue)
+		}
+	}
+
 	// channel to collect bids
 	bidsCh := make(chan Bid, len(bidders))
-	fmt.Println(bidsCh)
 
 	var wg sync.WaitGroup
 	for _, b := range bidders {
@@ -20,7 +32,7 @@ func RunAuction(ctx context.Context, auction *Auction, bidders []Bidder) {
 		go func(b Bidder) {
 			// place bid
 			defer wg.Done()
-			bid, ok := b.PlaceBid(auction.Attributes)
+			bid, ok := b.PlaceBid(auction.Attributes, auction.BaseValue, auction.TimeoutSec, delayFactorValue)
 			if ok {
 				bidsCh <- bid
 			}
@@ -65,7 +77,6 @@ end:
 
 		}
 	}
-
 
 	auction.Winner = winner
 	auction.DurationMs = auction.EndTs.Sub(auction.StartTs).Milliseconds()

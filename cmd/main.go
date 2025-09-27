@@ -2,24 +2,60 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
+	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/gitshubham45/auctionSimulator/internal/auctionPkg"
 	"github.com/gitshubham45/auctionSimulator/internal/utils"
+	"github.com/joho/godotenv"
 )
 
 const (
 	NumAuctions          = 40  // number of auctions to run concurrently
 	NumBiddersPerAuction = 100 // number of bidders participating in each auction
 	NumAttributes        = 20  // number of attributes per auction
+
+	// we can set this to runtime.GOMAXPROCS(0) * X where X is factor of goroutines per CPU.
+	SemaphoreLimitFactor = 8
 )
 
 func main() {
 	fmt.Println("Welcome to Auction Simulator")
+	// rand.Seed(time.Now().UnixNano())
+
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal("Error loading .env file", err)
+	}
+
+	vcpuEnv := os.Getenv("SIM_VCPU")
+	vcpu := runtime.NumCPU()
+	if v, err := strconv.Atoi(vcpuEnv); err == nil && v > 0 {
+		vcpu = v
+	}
+
+	runtime.GOMAXPROCS(vcpu)
+	fmt.Printf("Using GOMAXPROCS=%d (vCPU units). NumCPU reported: %d\n", runtime.GOMAXPROCS(0), runtime.NumCPU())
+
+	// we can set this to runtime.GOMAXPROCS(0) * X where X is factor of goroutines per CPU.
+	SemaphoreLimitFactor := os.Getenv("SEMPAPHORE_LIMIT_FACTOR")
+	SemaphoreLimitFactorValue := 4
+	if v, err := strconv.Atoi(SemaphoreLimitFactor); err == nil && v > 0 {
+		SemaphoreLimitFactorValue = v
+	}
+	semCap := runtime.GOMAXPROCS(0) * SemaphoreLimitFactorValue
+	if semCap < 1 {
+		semCap = 1
+	}
+	
+	sem := utils.NewSemaphore(semCap)
+	fmt.Printf("Semaphore concurrency limit = %d\n", semCap)
 
 	bidders := make([]auctionPkg.Bidder, NumBiddersPerAuction)
 
@@ -54,12 +90,16 @@ func main() {
 
 	for _, auction := range auctions {
 		wg.Add(1)
+		sem.Acquire()
 
 		go func(auc *auctionPkg.Auction) {
 			defer wg.Done()
+			defer sem.Release()
 			// Run Auctions
 			auctionPkg.RunAuction(context.Background(), auc, bidders)
-			fmt.Printf("Auction %d Completed: Winner %v, Duration %d md \n", auc.ID, auc.Winner, auc.DurationMs)
+			winnerJSON, _ := json.Marshal(auc.Winner)
+			fmt.Printf("Auction %d Completed: Winner %s, Duration %d md \n", auc.ID, winnerJSON, auc.DurationMs)
+			fmt.Println("Total Bids", len(auc.Bids))
 		}(auction)
 	}
 
