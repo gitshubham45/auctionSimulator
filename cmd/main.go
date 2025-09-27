@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"runtime"
@@ -21,14 +22,13 @@ const (
 	NumAuctions          = 40  // number of auctions to run concurrently
 	NumBiddersPerAuction = 100 // number of bidders participating in each auction
 	NumAttributes        = 20  // number of attributes per auction
-
-	// we can set this to runtime.GOMAXPROCS(0) * X where X is factor of goroutines per CPU.
-	SemaphoreLimitFactor = 8
 )
 
 func main() {
-	fmt.Println("Welcome to Auction Simulator")
-	// rand.Seed(time.Now().UnixNano())
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	mem := humanizeBytes(m.Sys)
+	fmt.Printf("Initial memory usage: %v bytes\n", mem)
 
 	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatal("Error loading .env file", err)
@@ -53,13 +53,13 @@ func main() {
 	if semCap < 1 {
 		semCap = 1
 	}
-	
+
 	sem := utils.NewSemaphore(semCap)
 	fmt.Printf("Semaphore concurrency limit = %d\n", semCap)
 
 	bidders := make([]auctionPkg.Bidder, NumBiddersPerAuction)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < NumBiddersPerAuction; i++ {
 		bidders[i] = auctionPkg.Bidder{
 			ID: i + 1,
 		}
@@ -116,4 +116,18 @@ func main() {
 			fmt.Println("Error wrting to output directory")
 		}
 	}
+
+	runtime.ReadMemStats(&m)
+	mem = humanizeBytes(m.Sys)
+	fmt.Printf("Initial memory usage: %v bytes\n", mem)
+}
+
+func humanizeBytes(s uint64) string {
+	if s < 1024 {
+		return fmt.Sprintf("%d B", s)
+	}
+	exp := int(math.Log(float64(s)) / math.Log(1024))
+	suffix := "KMGTPE"[exp-1]
+	val := float64(s) / math.Pow(1024, float64(exp))
+	return fmt.Sprintf("%.2f %cB", val, suffix)
 }

@@ -1,19 +1,17 @@
 # 🎯 Auction Simulator
 
-A concurrent auction simulation system that runs 40 auctions in parallel with 100 bidders each, measuring performance under controlled resource constraints.
+A concurrent auction simulation system that runs multiple auctions in parallel with multiple bidders each, measuring performance under controlled resource constraints.
 
 ## 📌 Objective
 
 The goal of this project is to design and implement an **Auction Simulator** that:
 
-- Runs **40 auctions concurrently**
-- Simulates **100 bidders per auction**, each making decisions based on item attributes
+- Runs **multiple auctions concurrently**
+- Simulates **multiple bidders per auction**, each making decisions based on item attributes
 - Enforces **per-auction timeouts**
 - Collects valid bids and declares winners
 - Measures **end-to-end execution time** (from first auction start to last completion)
 - Standardizes resource usage (vCPU, RAM) for consistent and reproducible behavior
-
-This project satisfies the requirements of a scalable, deterministic simulation suitable for performance benchmarking and concurrency testing.
 
 ---
 

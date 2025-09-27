@@ -66,7 +66,6 @@ func RunAuction(ctx context.Context, auction *Auction, bidders []Bidder) {
 	}
 
 end:
-
 	// find winner with highes bid
 	var winner *Bid
 	var maxAmount float64 = -1
